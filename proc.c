@@ -293,9 +293,9 @@ scheduler(void)
     // Loop over process table looking for process to run.
     acquire(&ptable.lock);
     struct proc *pp; // process with max priority
-    for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+    for(pp = ptable.proc; pp < &ptable.proc[NPROC]; pp++){
       if(p->state == RUNNABLE) {
-        pp = p;
+        break;
       }
     }
     for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
