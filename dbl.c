@@ -3,6 +3,6 @@
 #include "user.h"
 
 int main(int argc, char *argv[]) {
-    printf(1, "%d\n", atoi(argv[1]));
+    printf(1, "%d\n", dbl(atoi(argv[1])));
     exit();
 }
