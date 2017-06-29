@@ -2,7 +2,7 @@
 #include "stat.h"
 #include "user.h"
 
-int main(int argc, int *argv[]) {
+int main(int argc, char *argv[]) {
     printf(1, "%d\n", atoi(argv[1]));
     exit();
 }
