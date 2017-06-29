@@ -291,7 +291,7 @@ scheduler(void)
 
     // Loop over process table looking for process to run.
     acquire(&ptable.lock);
-    struct proc *pp; // process with max priority
+    struct proc *pp = ptable.proc; // process with max priority
     for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
       if(p->state == RUNNABLE && pp->pri < p->pri) {
         pp = p;
@@ -300,11 +300,11 @@ scheduler(void)
     // Switch to chosen process.  It is the process's job
     // to release ptable.lock and then reacquire it
     // before jumping back to us.
-    p->pri--;
-    proc = p;
-    switchuvm(p);
-    p->state = RUNNING;
-    swtch(&cpu->scheduler, p->context);
+    pp->pri--;
+    proc = pp;
+    switchuvm(pp);
+    pp->state = RUNNING;
+    swtch(&cpu->scheduler, pp->context);
     switchkvm();
 
     // Process is done running for now.
