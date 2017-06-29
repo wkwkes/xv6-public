@@ -495,3 +495,25 @@ procdump(void)
     cprintf("\n");
   }
 }
+
+
+int 
+setscheduler(int pid, int priority)
+{
+  int res;
+  acquire(&ptable.lock);
+  struct proc *p;
+  for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+    if(p->pid == pid) {
+      p->pri = priority;
+      break;
+    }
+  }
+  if (p == &ptable.proc[NPROC]) {
+    res = -1;
+  } else {
+    res = 1;
+  }
+  release(&ptable.lock);
+  return res;
+}
