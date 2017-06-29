@@ -300,10 +300,10 @@ scheduler(void)
     // Switch to chosen process.  It is the process's job
     // to release ptable.lock and then reacquire it
     // before jumping back to us.
-    p->pri--;
-    proc = p;
-    switchuvm(p);
-    p->state = RUNNING;
+    pp->pri--;
+    proc = pp;
+    switchuvm(pp);
+    pp->state = RUNNING;
     swtch(&cpu->scheduler, p->context);
     switchkvm();
 
