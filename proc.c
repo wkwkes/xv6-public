@@ -306,7 +306,7 @@ scheduler(void)
       // to release ptable.lock and then reacquire it
       // before jumping back to us.
       p->pri--;
-      cprintf("\ncpu%d: process priority of %d : %d at %d\n\n", cpunum(), p->pid, p->pri, p->state);
+      // cprintf("\ncpu%d: process priority of %d : %d at %d\n\n", cpunum(), p->pid, p->pri, p->state);
       proc = p;
       switchuvm(p);
       p->state = RUNNING;
@@ -501,6 +501,7 @@ int
 setscheduler(int pid, int priority)
 {
   int res;
+
   acquire(&ptable.lock);
   struct proc *p;
   for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
@@ -515,5 +516,24 @@ setscheduler(int pid, int priority)
     res = 1;
   }
   release(&ptable.lock);
+
+  return res;
+}
+
+int 
+getscheduler(int pid)
+{
+  int res = -1;
+
+  acquire(&ptable.lock);
+  struct proc *p;
+  for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+    if(p->pid == pid) {
+      res = p->pri;
+      break;
+    }
+  }
+  release(&ptable.lock);
+
   return res;
 }

@@ -117,6 +117,7 @@ int             wait(void);
 void            wakeup(void*);
 void            yield(void);
 int             setscheduler(int, int);
+int             getscheduler(int);
 
 // swtch.S
 void            swtch(struct context**, struct context*);

@@ -24,6 +24,7 @@ char* sbrk(int);
 int sleep(int);
 int uptime(void);
 int setscheduler(int, int);
+int getscheduler(int);
 
 
 // ulib.c

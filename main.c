@@ -37,7 +37,7 @@ main(void)
   startothers();   // start other processors
   kinit2(P2V(4*1024*1024), P2V(PHYSTOP)); // must come after startothers()
   userinit();      // first user process
-  cprintf("\ncpu%d: called userinit\n\n", cpunum());
+  // cprintf("\ncpu%d: called userinit\n\n", cpunum());
   mpmain();        // finish this processor's setup
 }
 
@@ -68,7 +68,7 @@ pde_t entrypgdir[];  // For entry.S
 static void
 startothers(void)
 {
-  cprintf("\ncpu%d: starting startothers\n\n", cpunum());
+  // cprintf("\ncpu%d: starting startothers\n\n", cpunum());
   extern uchar _binary_entryother_start[], _binary_entryother_size[];
   uchar *code;
   struct cpu *c;
@@ -79,7 +79,7 @@ startothers(void)
   // _binary_entryother_start.
   code = P2V(0x7000);
   memmove(code, _binary_entryother_start, (uint)_binary_entryother_size);
-  cprintf("\ncpu%d: reach after memmove\n\n", cpunum());
+  // cprintf("\ncpu%d: reach after memmove\n\n", cpunum());
   for(c = cpus; c < cpus+ncpu; c++){
     if(c == cpus+cpunum())  // We've started already.
       continue;
@@ -88,13 +88,13 @@ startothers(void)
     // pgdir to use. We cannot use kpgdir yet, because the AP processor
     // is running in low  memory, so we use entrypgdir for the APs too.
     stack = kalloc();
-    cprintf("\ncpu%d: reach after kalloc\n\n", cpunum());
+    // cprintf("\ncpu%d: reach after kalloc\n\n", cpunum());
     *(void**)(code-4) = stack + KSTACKSIZE;
     *(void**)(code-8) = mpenter;
     *(int**)(code-12) = (void *) V2P(entrypgdir);
-    cprintf("\ncpu%d: reach before lapicstartap\n\n", cpunum());
+    // cprintf("\ncpu%d: reach before lapicstartap\n\n", cpunum());
     lapicstartap(c->apicid, V2P(code));
-    cprintf("\ncpu%d: reach after lapicstartap\n\n", cpunum());
+    // cprintf("\ncpu%d: reach after lapicstartap\n\n", cpunum());
     
     // wait for cpu to finish mpmain()
     while(c->started == 0)

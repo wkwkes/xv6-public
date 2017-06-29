@@ -101,3 +101,13 @@ sys_setscheduler(void)
   
   return setscheduler(pid, pri);
 }
+
+int 
+sys_getscheduler(void)
+{
+  int pid;
+  if (argint(0, &pid) < 0)
+    return -1;
+
+  return getscheduler(pid);
+}
