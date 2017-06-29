@@ -49,6 +49,7 @@ allocproc(void)
 found:
   p->state = EMBRYO;
   p->pid = nextpid++;
+  p->pri = 1000;
 
   release(&ptable.lock);
 
@@ -99,6 +100,8 @@ userinit(void)
   p->tf->eflags = FL_IF;
   p->tf->esp = PGSIZE;
   p->tf->eip = 0;  // beginning of initcode.S
+
+  p->pri = 1000;
 
   safestrcpy(p->name, "initcode", sizeof(p->name));
   p->cwd = namei("/");
@@ -161,7 +164,9 @@ fork(void)
 
   // Clear %eax so that fork returns 0 in the child.
   np->tf->eax = 0;
-
+  
+  np->pri = proc->pri; // copy parent's priority
+  
   for(i = 0; i < NOFILE; i++)
     if(proc->ofile[i])
       np->ofile[i] = filedup(proc->ofile[i]);
@@ -286,14 +291,22 @@ scheduler(void)
     sti();
 
     // Loop over process table looking for process to run.
+    // cprintf("\ncpu%d: start lock\n\n", cpunum());
     acquire(&ptable.lock);
-    for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
-      if(p->state != RUNNABLE)
-        continue;
-
+    // Get a process with the largest priority
+    struct proc *pp;
+    p = ptable.proc;
+    for(pp = ptable.proc; pp < &ptable.proc[NPROC]; pp++){
+      if(pp->state == RUNNABLE && (p->pri < pp->pri || p->state != RUNNABLE)) {
+        p = pp;
+      }
+    }
+    if (p->state == RUNNABLE) {
       // Switch to chosen process.  It is the process's job
       // to release ptable.lock and then reacquire it
       // before jumping back to us.
+      p->pri--;
+      cprintf("\ncpu%d: process priority of %d : %d at %d\n\n", cpunum(), p->pid, p->pri, p->state);
       proc = p;
       switchuvm(p);
       p->state = RUNNING;
@@ -305,7 +318,6 @@ scheduler(void)
       proc = 0;
     }
     release(&ptable.lock);
-
   }
 }
 

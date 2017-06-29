@@ -97,6 +97,7 @@ exec(char *path, char **argv)
   proc->sz = sz;
   proc->tf->eip = elf.entry;  // main
   proc->tf->esp = sp;
+  proc->pri = 1000; // need this? 5 is for now, 
   switchuvm(proc);
   freevm(oldpgdir);
   return 0;
