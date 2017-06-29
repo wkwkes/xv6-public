@@ -90,7 +90,7 @@ sys_uptime(void)
   return xticks;
 }
 
-int sys_double(void) {
+int sys_dbl(void) {
   int n;
   
   if (argint(0, &n) < 0) 
