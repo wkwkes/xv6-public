@@ -100,8 +100,6 @@ userinit(void)
   p->tf->esp = PGSIZE;
   p->tf->eip = 0;  // beginning of initcode.S
 
-  p->pri = 10;
-
   safestrcpy(p->name, "initcode", sizeof(p->name));
   p->cwd = namei("/");
 
@@ -161,7 +159,6 @@ fork(void)
   np->parent = proc;
   *np->tf = *proc->tf;
 
-  np->pri = proc->pri; // copy parent's priority
 
   // Clear %eax so that fork returns 0 in the child.
   np->tf->eax = 0;
@@ -291,26 +288,23 @@ scheduler(void)
 
     // Loop over process table looking for process to run.
     acquire(&ptable.lock);
-    struct proc *pp = ptable.proc; // process with max priority
     for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
-      if(p->state == RUNNABLE && pp->pri < p->pri) {
-        pp = p;
-      }
+      if(p->state != RUNNABLE)
+        continue;
+
+      // Switch to chosen process.  It is the process's job
+      // to release ptable.lock and then reacquire it
+      // before jumping back to us.
+      proc = p;
+      switchuvm(p);
+      p->state = RUNNING;
+      swtch(&cpu->scheduler, p->context);
+      switchkvm();
+
+      // Process is done running for now.
+      // It should have changed its p->state before coming back.
+      proc = 0;
     }
-    // Switch to chosen process.  It is the process's job
-    // to release ptable.lock and then reacquire it
-    // before jumping back to us.
-    pp->pri--;
-    proc = pp;
-    switchuvm(pp);
-    pp->state = RUNNING;
-    swtch(&cpu->scheduler, p->context);
-    switchkvm();
-
-    // Process is done running for now.
-    // It should have changed its p->state before coming back.
-    proc = 0;
-
     release(&ptable.lock);
   }
 }
