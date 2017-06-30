@@ -305,13 +305,14 @@ scheduler(void)
       // Switch to chosen process.  It is the process's job
       // to release ptable.lock and then reacquire it
       // before jumping back to us.
-      p->pri--;
-      // cprintf("\ncpu%d: process priority of %d : %d at %d\n\n", cpunum(), p->pid, p->pri, p->state);
+      
       proc = p;
       switchuvm(p);
       p->state = RUNNING;
       swtch(&cpu->scheduler, p->context);
       switchkvm();
+
+      p->pri--;
 
       // Process is done running for now.
       // It should have changed its p->state before coming back.
