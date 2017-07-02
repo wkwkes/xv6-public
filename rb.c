@@ -1,4 +1,4 @@
-// gcc  -O2 -Wall -MD -ggdb -m32 -Werror -fno-omit-frame-pointer rb.c
+
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -210,10 +210,6 @@ insert(struct node* root, struct node* nd)
 
   insert_helper(root, nd);
 
-  // printf("\n");
-  // dump_nodes(groot, 10);
-  // printf("\n");
-
   while (1) {
     if (nd->parent == NULL) {
       nd->color = BLACK;
@@ -275,60 +271,73 @@ insert(struct node* root, struct node* nd)
   groot_mod(nd);
 }
 
-void delete (struct node* root, int proc_index)
+void
+reduce(struct node* p)
 {
-  struct node* u = NULL; // child that replace v
-  struct node* v = NULL; // to delete
-  struct node* root_ = root;
-  while (u == NULL && v == NULL) {
-    if (root_ == NULL) {
-      break;
-    }
-    printf("here!!\n");
-    if (root_->proc_index == proc_index) { // delete root
-      printf("here!!\n");
-      if (root_->left != NULL && root_->right != NULL) {
-        struct node* min_node = root_->right;
-        while (min_node->left != NULL) {
-          min_node = min_node->left;
-        }
-        printf("here!!\n");
-        swap(min_node, root_);
-        root_ = min_node;
-        proc_index = min_node->proc_index;
-      } else if (root_->left != NULL) {
-        u = root_->left;
-        v = root_;
-      } else if (root_->right != NULL) {
-        u = root_->right;
-        v = root_;
+  if (p == NULL) {
+    return;
+  }
+  struct node* s = p->right; // s cannot be NULL
+  if (s->color == BLACK) {
+    if (s->left == NULL && s->right == NULL) {
+      s->color = RED;
+      if (p->color == RED) {
+        p->color = BLACK;
       } else {
-        v = root_;
+        reduce(p->parent);
       }
-    } else if (proc_index < root_->proc_index) {
-      printf("here!ll(%d, %d)\n", proc_index, root_->proc_index);
-      root_ = root_->left;
-    } else { // proc_index > root_->proc_index
-      printf("here!rr(%d, %d)\n", proc_index, root_->proc_index);
-      root_ = root_->right;
+    } else if (s->right != NULL) { // s->right must be RED
+      rotate_left(s, p);
+      s->right->color = BLACK;
+    } else if (s->left != NULL) {
+      struct node* r = s->left;
+      rotate_right(r, s);
+      rotate_left(r, p);
+    }
+  } else {
+    rotate_left(s, p);
+    reduce(p);
+  }
+}
+
+struct node*
+get_min(struct node* root)
+{
+  struct node* v = root; // min node
+  while (v->left != NULL) {
+    v = v->left;
+  }
+  if (v->parent == NULL) {
+    // v->left must be NULL
+    groot = v->right;
+    if (v->right != NULL) {
+      v->right->parent = NULL;
+      v->right->color = BLACK;
+    }
+    return v;
+  }
+  if (v->color == RED) {
+    // when v is leftmost and RED, v has no children because
+    //   * v doesn't have a left child since it is leftmost
+    //   * v doesn't have a RED right child since v is RED
+    //   * v doesn't have a BLACK right child since the
+    //     right child's leaf's path has much BLACK nodes
+    //     than left.
+    // that is v->left == NULL and v->right == NULL.
+    v->parent->left = NULL;
+  } else {
+    if (v->right != NULL) {
+      // v->right must be RED
+      v->right->dir = 0;
+      v->right->color = BLACK;
+      v->right->parent = v->parent;
+      v->parent->left = v->right;
+    } else { // v->right is leaf (with two NULLs)
+      v->parent->left = NULL;
+      reduce(v->parent);
     }
   }
-
-  if (u) {
-    printf("\nu\n");
-    dump_node(u, 10);
-    groot_mod(u);
-  } else {
-    printf("u is NULL\n");
-  }
-  if (v) {
-    printf("\nv\n");
-    dump_node(v, 10);
-    groot_mod(v);
-  } else {
-    printf("v is NULL\n");
-  }
-  dump_nodes(groot, 0);
+  return v;
 }
 
 int
@@ -370,7 +379,14 @@ main()
   insert(groot, ins);
   dump_nodes(groot, 0);
 
-  delete (groot, 2);
+  printf("------\n");
+  dump_node(get_min(groot), 0);
+  printf("------\n");
+  dump_node(get_min(groot), 0);
+  printf("------\n");
+  dump_node(get_min(groot), 0);
+
+  dump_nodes(groot, 0);
 
   free(nd);
   free(l);
