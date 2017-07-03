@@ -1,5 +1,8 @@
+
 #include <stdio.h>
 #include <stdlib.h>
+
+#define size 64
 
 enum Color
 {
@@ -297,6 +300,9 @@ struct node*
 get_min(struct node* root)
 {
   struct node* v = root; // min node
+  if (v == NULL) {
+    return NULL;
+  }
   while (v->left != NULL) {
     v = v->left;
   }
@@ -333,59 +339,3 @@ get_min(struct node* root)
   return v;
 }
 
-int
-main()
-{
-  struct node* nd = malloc(sizeof(struct node));
-  struct node* l = malloc(sizeof(struct node));
-  struct node* r = malloc(sizeof(struct node));
-  struct node* ll = malloc(sizeof(struct node));
-  struct node* ins = malloc(sizeof(struct node));
-
-  node_init(nd, 1000, BLACK, 0, 0, NULL, NULL, NULL);
-  node_init(l, 900, RED, 1, 0, NULL, NULL, NULL);
-  node_init(r, 800, RED, 2, 1, NULL, NULL, NULL);
-  node_init(ll, 700, RED, 3, 0, NULL, NULL, NULL);
-  node_init(ins, 850, RED, 4, 0, NULL, NULL, NULL);
-
-  // node_init(nd, 1000, BLACK, 0, 0, NULL, l, r);
-  // node_init(l, 900, BLACK, 1, 0, nd, ll, NULL);
-  // node_init(r, 800, BLACK, 2, 1, nd, NULL, NULL);
-  // node_init(ll, 700, RED, 3, 0, l, NULL, NULL);
-  // node_init(ins, 850, RED, 4, 0, NULL, NULL, NULL);
-
-  dump_nodes(nd, 0);
-  groot = NULL;
-  insert(groot, nd);
-  printf("\n\n\n");
-  insert(groot, l);
-  dump_nodes(groot, 0);
-
-  printf("\n\n\n");
-  insert(groot, r);
-  dump_nodes(groot, 0);
-
-  printf("\n\n\n");
-  insert(groot, ll);
-  dump_nodes(groot, 0);
-
-  printf("\n\n\n");
-  insert(groot, ins);
-  dump_nodes(groot, 0);
-
-  printf("------\n");
-  dump_node(get_min(groot), 0);
-  printf("------\n");
-  dump_node(get_min(groot), 0);
-  printf("------\n");
-  dump_node(get_min(groot), 0);
-
-  dump_nodes(groot, 0);
-
-  free(nd);
-  free(l);
-  free(r);
-  free(ll);
-  free(ins);
-  return 1;
-}
