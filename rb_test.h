@@ -1,5 +1,8 @@
 
-#define NULL ((void*)0)
+#include <stdio.h>
+#include <stdlib.h>
+
+#define NULL_ ((void*)0)
 
 enum Color
 {
@@ -51,74 +54,74 @@ dump_node(struct node* nd, int indent)
 {
   int i;
   for (i = 0; i < indent; i++)
-    cprintf(" ");
-  cprintf("+----------\n");
+    printf(" ");
+  printf("+----------\n");
   for (i = 0; i < indent; i++)
-    cprintf(" ");
-  cprintf("|pri:%d\n", nd->pri);
+    printf(" ");
+  printf("|pri:%d\n", nd->pri);
 
   for (i = 0; i < indent; i++)
-    cprintf(" ");
+    printf(" ");
 
   if (nd->color == RED) {
-    cprintf("|color:RED\n");
+    printf("|color:RED\n");
   } else {
-    cprintf("|color:BLACK\n");
+    printf("|color:BLACK\n");
   }
 
   for (i = 0; i < indent; i++)
-    cprintf(" ");
-  cprintf("|proc_index:%d\n", nd->proc_index);
+    printf(" ");
+  printf("|proc_index:%d\n", nd->proc_index);
 
   for (i = 0; i < indent; i++)
-    cprintf(" ");
+    printf(" ");
   if (nd->dir == 1) {
-    cprintf("|dir:right\n");
+    printf("|dir:right\n");
   } else {
-    cprintf("|dir:left\n");
+    printf("|dir:left\n");
   }
 
   for (i = 0; i < indent; i++)
-    cprintf(" ");
-  if (nd->parent != NULL) {
-    cprintf("|parent_id:%d\n", nd->parent->proc_index);
+    printf(" ");
+  if (nd->parent != NULL_) {
+    printf("|parent_id:%d\n", nd->parent->proc_index);
   } else {
-    cprintf("|parent_id:NULL\n");
+    printf("|parent_id:NULL_\n");
   }
 
   for (i = 0; i < indent; i++)
-    cprintf(" ");
-  if (nd->left == NULL) {
-    cprintf("|left:NULL\n");
+    printf(" ");
+  if (nd->left == NULL_) {
+    printf("|left:NULL_\n");
   } else {
-    cprintf("|left:%d\n", nd->left->proc_index);
+    printf("|left:%d\n", nd->left->proc_index);
   }
 
   for (i = 0; i < indent; i++)
-    cprintf(" ");
-  if (nd->right == NULL) {
-    cprintf("|right:NULL\n");
+    printf(" ");
+  if (nd->right == NULL_) {
+    printf("|right:NULL_\n");
   } else {
-    cprintf("|right:%d\n", nd->right->proc_index);
+    printf("|right:%d\n", nd->right->proc_index);
   }
   for (i = 0; i < indent; i++)
-    cprintf(" ");
-  cprintf("+----------\n");
+    printf(" ");
+  printf("+----------\n");
 }
 
 void
 dump_nodes(struct node* root, int indent)
 {
-  if (root == NULL) 
+  if (root == NULL_) 
     return;
     
   dump_node(root, indent);
 
-  if (root->left != NULL) {
+  if (root->left != NULL_) {
     dump_nodes(root->left, indent + 5);
   }
 
-  if (root->right != NULL) {
+  if (root->right != NULL_) {
     dump_nodes(root->right, indent + 5);
   }
 }
@@ -148,13 +151,13 @@ swap(struct node* nd1, struct node* nd2)
 void
 insert_helper(struct node* root, struct node* nd)
 {
-  if (root == NULL) {
+  if (root == NULL_) {
     groot = nd;
     return;
   }
   if (nd->pri < root->pri) {
     nd->dir = 0;
-    if (root->left == NULL) {
+    if (root->left == NULL_) {
       root->left = nd;
       nd->parent = root;
       groot_mod(root);
@@ -163,7 +166,7 @@ insert_helper(struct node* root, struct node* nd)
     }
   } else {
     nd->dir = 1;
-    if (root->right == NULL) {
+    if (root->right == NULL_) {
       root->right = nd;
       nd->parent = root;
       groot_mod(root);
@@ -225,12 +228,12 @@ insert(struct node* root, struct node* nd)
   nd->color = RED;
   
   // TODO
-  nd->left = nd->right = NULL;
+  nd->left = nd->right = NULL_;
 
   insert_helper(root, nd);
 
   while (1) {
-    if (nd->parent == NULL) {
+    if (nd->parent == NULL_) {
       nd->color = BLACK;
       break;
     }
@@ -248,7 +251,7 @@ insert(struct node* root, struct node* nd)
     }
 
     enum Color uncle_color;
-    if (uncle == NULL) {
+    if (uncle == NULL_) {
       uncle_color = BLACK;
     } else {
       uncle_color = uncle->color;
@@ -293,22 +296,22 @@ insert(struct node* root, struct node* nd)
 void
 reduce(struct node* p)
 {
-  if (p == NULL) {
+  if (p == NULL_) {
     return;
   }
-  struct node* s = p->right; // s cannot be NULL
+  struct node* s = p->right; // s cannot be NULL_
   if (s->color == BLACK) {
-    if (s->left == NULL && s->right == NULL) {
+    if (s->left == NULL_ && s->right == NULL_) {
       s->color = RED;
       if (p->color == RED) {
         p->color = BLACK;
       } else {
         reduce(p->parent);
       }
-    } else if (s->right != NULL) { // s->right must be RED
+    } else if (s->right != NULL_) { // s->right must be RED
       rotate_left(s, p);
       s->right->color = BLACK;
-    } else if (s->left != NULL) {
+    } else if (s->left != NULL_) {
       struct node* r = s->left;
       rotate_right(r, s);
       rotate_left(r, p);
@@ -323,17 +326,17 @@ struct node*
 get_min(struct node* root)
 {
   struct node* v = root; // min node
-  if (v == NULL) {
-    return NULL;
+  if (v == NULL_) {
+    return NULL_;
   }
-  while (v->left != NULL) {
+  while (v->left != NULL_) {
     v = v->left;
   }
-  if (v->parent == NULL) {
-    // v->left must be NULL
+  if (v->parent == NULL_) {
+    // v->left must be NULL_
     groot = v->right;
-    if (v->right != NULL) {
-      v->right->parent = NULL;
+    if (v->right != NULL_) {
+      v->right->parent = NULL_;
       v->right->color = BLACK;
     }
     return v;
@@ -345,17 +348,17 @@ get_min(struct node* root)
     //   * v doesn't have a BLACK right child since the
     //     right child's leaf's path has much BLACK nodes
     //     than left.
-    // that is v->left == NULL and v->right == NULL.
-    v->parent->left = NULL;
+    // that is v->left == NULL_ and v->right == NULL_.
+    v->parent->left = NULL_;
   } else {
-    if (v->right != NULL) {
+    if (v->right != NULL_) {
       // v->right must be RED
       v->right->dir = 0;
       v->right->color = BLACK;
       v->right->parent = v->parent;
       v->parent->left = v->right;
-    } else { // v->right is leaf (with two NULLs)
-      v->parent->left = NULL;
+    } else { // v->right is leaf (with two NULL_s)
+      v->parent->left = NULL_;
       reduce(v->parent);
     }
   }

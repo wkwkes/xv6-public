@@ -7,6 +7,8 @@
 #include "proc.h"
 #include "spinlock.h"
 
+#include "rb.h"
+
 struct {
   struct spinlock lock;
   struct proc proc[NPROC];
@@ -20,10 +22,77 @@ extern void trapret(void);
 
 static void wakeup1(void *chan);
 
+/*************** for scheduler ******************/
+const int node_size = 29;
+char* node_pool;
+int node_pool_acc;
+
+int
+is_used(char* ptr)
+{
+  if (ptr[node_size - 1] == 1) {
+    return 1;
+  } else {
+    return 0;
+  }
+}
+
+struct node*
+alloc_node_(int c)
+{
+  if (node_pool_acc + node_size <= 4096) {
+    node_pool_acc += node_size;
+    if (is_used(&node_pool[node_pool_acc - node_size]) == 0) {
+      node_pool[node_pool_acc - 1] = 1;
+      return (struct node*)&node_pool[node_pool_acc - node_size];
+    } else {
+      return alloc_node_(c);
+    }
+  } else {
+    if (c == 1) {
+      panic("out of memory : alloc_node!");
+    } else {
+      node_pool_acc = 0;
+      return alloc_node_(1);
+    }
+  }
+}
+
+struct node*
+alloc_node()
+{
+  return alloc_node_(0);
+}
+
+void
+free_node(struct node* nd)
+{
+  char* ptr = (char*)nd;
+  ptr[node_size - 1] = 0;
+}
+
+void
+new_proc(int pri, int pid)
+{
+  struct node* nd = alloc_node();
+  init_node(nd, pri, RED, pid - 1, 0, NULL, NULL, NULL);
+  add_proc(nd);
+  // dump_nodes(groot, 0);
+}
+
+/********************************************/
+
 void
 pinit(void)
 {
   initlock(&ptable.lock, "ptable");
+  if ((node_pool = kalloc()) == 0) {
+    panic("pinit: out of memory(node_pool)?");
+  }
+  int i;
+  for (i = 0; i < 4096; i++)
+    node_pool[i] = 0;
+  node_pool_acc = 0;
 }
 
 //PAGEBREAK: 32
@@ -37,6 +106,7 @@ allocproc(void)
   struct proc *p;
   char *sp;
 
+  // cprintf("acq 1\n");
   acquire(&ptable.lock);
 
   for(p = ptable.proc; p < &ptable.proc[NPROC]; p++)
@@ -110,8 +180,10 @@ userinit(void)
   // run this process. the acquire forces the above
   // writes to be visible, and the lock is also needed
   // because the assignment might not be atomic.
+  // cprintf("acq 2\n");
   acquire(&ptable.lock);
 
+  new_proc(p->pri, p->pid);
   p->state = RUNNABLE;
 
   release(&ptable.lock);
@@ -176,8 +248,11 @@ fork(void)
 
   pid = np->pid;
 
+  // cprintf("acq 3\n");
   acquire(&ptable.lock);
 
+  // cprintf("java 1\n");
+  new_proc(np->pri, np->pid);
   np->state = RUNNABLE;
 
   release(&ptable.lock);
@@ -210,6 +285,7 @@ exit(void)
   end_op();
   proc->cwd = 0;
 
+  // cprintf("acq 4\n");
   acquire(&ptable.lock);
 
   // Parent might be sleeping in wait().
@@ -238,6 +314,7 @@ wait(void)
   struct proc *p;
   int havekids, pid;
 
+  // cprintf("acq 5\n");
   acquire(&ptable.lock);
   for(;;){
     // Scan through table looking for exited children.
@@ -286,13 +363,23 @@ scheduler(void)
 {
   struct proc *p;
 
+  // if ((node_pool = kalloc()) == 0) {
+  //   panic("pinit: out of memory(node_pool)?");
+  // }
+  // int i;
+  // for (i = 0; i < 4096; i++)
+  //   node_pool[i] = 0;
+  // node_pool_acc = 0;
+
   for(;;){
     // Enable interrupts on this processor.
     sti();
 
     // Loop over process table looking for process to run.
     // cprintf("\ncpu%d: start lock\n\n", cpunum());
+    // cprintf("acq 6\n");
     acquire(&ptable.lock);
+    // cprintf("after 6\n");
     // Get a process with the largest priority
     struct proc *pp;
     p = ptable.proc;
@@ -306,6 +393,13 @@ scheduler(void)
       // to release ptable.lock and then reacquire it
       // before jumping back to us.
       
+      cprintf("---\n");
+      dump_nodes(groot, 1);
+      struct node *nd = get_proc();
+      // dump_node(nd, 0);
+      free_node(nd);
+      
+
       proc = p;
       switchuvm(p);
       p->state = RUNNING;
@@ -351,7 +445,10 @@ sched(void)
 void
 yield(void)
 {
+  // cprintf("acq 7\n");
   acquire(&ptable.lock);  //DOC: yieldlock
+  // cprintf("java 2\n");
+  new_proc(proc->pri, proc->pid);  
   proc->state = RUNNABLE;
   sched();
   release(&ptable.lock);
@@ -396,6 +493,7 @@ sleep(void *chan, struct spinlock *lk)
   // (wakeup runs with ptable.lock locked),
   // so it's okay to release lk.
   if(lk != &ptable.lock){  //DOC: sleeplock0
+    // cprintf("acq 8\n");
     acquire(&ptable.lock);  //DOC: sleeplock1
     release(lk);
   }
@@ -411,6 +509,7 @@ sleep(void *chan, struct spinlock *lk)
   // Reacquire original lock.
   if(lk != &ptable.lock){  //DOC: sleeplock2
     release(&ptable.lock);
+    // cprintf("acq 9\n");
     acquire(lk);
   }
 }
@@ -424,15 +523,20 @@ wakeup1(void *chan)
   struct proc *p;
 
   for(p = ptable.proc; p < &ptable.proc[NPROC]; p++)
-    if(p->state == SLEEPING && p->chan == chan)
+    if(p->state == SLEEPING && p->chan == chan) {
+      // cprintf("java 3\n");
+      new_proc(p->pri, p->pid);      
       p->state = RUNNABLE;
+    }
 }
 
 // Wake up all processes sleeping on chan.
 void
 wakeup(void *chan)
 {
+  // cprintf("acq 10\n");
   acquire(&ptable.lock);
+  // cprintf("after 10\n");
   wakeup1(chan);
   release(&ptable.lock);
 }
@@ -445,13 +549,17 @@ kill(int pid)
 {
   struct proc *p;
 
+  // cprintf("acq 1\n");
   acquire(&ptable.lock);
   for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
     if(p->pid == pid){
       p->killed = 1;
       // Wake process from sleep if necessary.
-      if(p->state == SLEEPING)
+      if(p->state == SLEEPING) {
+        // cprintf("java 4\n");
+        new_proc(p->pri, p->pid);
         p->state = RUNNABLE;
+      }
       release(&ptable.lock);
       return 0;
     }
@@ -503,6 +611,7 @@ setscheduler(int pid, int priority)
 {
   int res;
 
+  // cprintf("acq 12\n");
   acquire(&ptable.lock);
   struct proc *p;
   for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
@@ -526,6 +635,7 @@ getscheduler(int pid)
 {
   int res = -1;
 
+  // cprintf("acq 13\n");
   acquire(&ptable.lock);
   struct proc *p;
   for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
@@ -537,4 +647,12 @@ getscheduler(int pid)
   release(&ptable.lock);
 
   return res;
+}
+
+void pdump() {
+  if (groot == NULL) {
+    cprintf("NULL\n");
+    return;
+  }
+  dump_nodes(groot, 0);
 }
