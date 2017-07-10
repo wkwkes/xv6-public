@@ -100,6 +100,7 @@ extern int sys_write(void);
 extern int sys_uptime(void);
 extern int sys_setscheduler(void);
 extern int sys_getscheduler(void);
+extern int sys_pdump(void);
 
 static int (*syscalls[])(void) = {
 [SYS_fork]    sys_fork,
@@ -125,6 +126,7 @@ static int (*syscalls[])(void) = {
 [SYS_close]   sys_close,
 [SYS_setscheduler] sys_setscheduler,
 [SYS_getscheduler] sys_getscheduler,
+[SYS_pdump] sys_pdump,
 };
 
 void

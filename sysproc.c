@@ -111,3 +111,10 @@ sys_getscheduler(void)
 
   return getscheduler(pid);
 }
+
+int 
+sys_pdump(void) 
+{
+  pdump();
+  return 1;
+}

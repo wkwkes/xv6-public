@@ -25,6 +25,7 @@ int sleep(int);
 int uptime(void);
 int setscheduler(int, int);
 int getscheduler(int);
+int pdump(void);
 
 
 // ulib.c

@@ -118,6 +118,7 @@ void            wakeup(void*);
 void            yield(void);
 int             setscheduler(int, int);
 int             getscheduler(int);
+void            pdump(void);
 
 // swtch.S
 void            swtch(struct context**, struct context*);
