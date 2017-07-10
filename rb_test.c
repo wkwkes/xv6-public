@@ -89,7 +89,7 @@ new_proc(int pri, int pid)
   struct node* nd = alloc_node();
   init_node(nd, pri, RED, pid - 1, 0, NULL, NULL, NULL);
   add_proc(nd);
-  // dump_nodes(groot, 0);
+  dump_nodes(groot, 0);
 }
 
 int
@@ -178,17 +178,32 @@ main()
   //   dump_nodes(groot, 0);
   //   new_proc(600, 5);
   //   dump_nodes(groot, 0);
+  printf("%d\n", abs(random()));
 
   for (int i = 0; i < 141; i++) {
-    new_proc(1000 - i, i);
+    int j = abs(random()) % 1000;
+    printf("%d, %d\n", j, i);
+    new_proc(j, i);
   }
 
-  struct node* nd = get_proc();
-  free_node(nd);
-  new_proc(5000, 1000);
+  printf("\n\n");
+//   struct node* nd = get_proc();
+//   free_node(nd);
+//   new_proc(5000, 1000);
   //   new_proc(5000, 1000);
 
   rb_check(groot);
+  
+  for (int i = 0; i < 141; i++) {
+    struct node* nd = get_proc();
+    if (nd == NULL) {
+        printf("NULL?????\n");
+        break;
+    }
+    printf("%d\n", nd->pri);
+    free_node(nd);
+  }
+  
   //   struct node* nd1 = alloc_node();
   //   init_node(nd1, 1000, RED, 1, 0, NULL, NULL, NULL);
   //   struct node* nd2 = alloc_node();
@@ -214,4 +229,5 @@ main()
   //   alloc_node(0);
   //   free_node(node_pool + node_pool_acc - node_size);
   //   alloc_node(0);
+
 }
