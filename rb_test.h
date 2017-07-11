@@ -360,19 +360,21 @@ reduce(struct node* par, int dir)
       // printf("s is left\n");
       if (s->left != NULL_ && s->left->color == RED) {
         // if (s->left->color == RED) { // left-left
-          r_is_red = 1;
-          r = s->left;
-          r->color = BLACK;
-          // p->right = NULL_;
-          s->color = p->color;
-          p->color = BLACK;
-          rotate_right(s, p);
+        r_is_red = 1;
+        r = s->left;
+        r->color = BLACK;
+        // p->right = NULL_;
+        s->color = p->color;
+        p->color = BLACK;
+        rotate_right(s, p);
         // }
       } else if (s->right != NULL_) {
         if (s->right->color == RED) { // left-right
           r_is_red = 1;
           r = s->right;
-          r->color = BLACK;
+          if (p->color == BLACK) {
+            r->color = BLACK;
+          }
           // p->right = NULL_;
           p->color = BLACK;
           rotate_left(r, s);
@@ -383,15 +385,15 @@ reduce(struct node* par, int dir)
       // printf("s is right\n");
       if (s->right != NULL_ && s->right->color == RED) {
         // if (s->right->color == RED) { // right-right
-          // printf("right-right\n");
-          r_is_red = 1;
-          r = s->right;
-          // p->left = NULL_;
-          r->color = BLACK;
-          s->color = p->color;
-          p->color = BLACK;
-          // printf("call rotate_left\n");
-          rotate_left(s, p);
+        // printf("right-right\n");
+        r_is_red = 1;
+        r = s->right;
+        // p->left = NULL_;
+        r->color = BLACK;
+        s->color = p->color;
+        p->color = BLACK;
+        // printf("call rotate_left\n");
+        rotate_left(s, p);
         // }
       } else if (s->left != NULL_) {
         if (s->left->color == RED) { // right-left
@@ -399,13 +401,19 @@ reduce(struct node* par, int dir)
           r_is_red = 1;
           r = s->left;
           // p->left = NULL_;
-          r->color = BLACK;
+          if (p->color == BLACK) {
+            r->color = BLACK;
+          }
           rotate_right(r, s);
           rotate_left(r, p);
         }
       }
     }
     if (r_is_red == 0) {
+      // if (v != NULL_) {
+      //   reduce(p->parent, p->dir);
+      //   return;
+      // }
       s->color = RED;
       if (p->color == RED) {
         p->color = BLACK;
@@ -413,7 +421,7 @@ reduce(struct node* par, int dir)
         reduce(p->parent, p->dir);
       }
     }
-  } else {             // s_color == RED
+  } else { // s_color == RED
     // printf("s_color is RED\n");
     if (s->dir == 0) { // left
       s->color = BLACK;
@@ -453,6 +461,21 @@ void delete (struct node* root, struct node* v)
     printf("delete : v is NULL\n");
     return;
   }
+  // struct node* v_succ = v->right;
+  // if (v_succ != NULL_) {
+  //   while (v_succ->left != NULL_) {
+  //     v_succ = v_succ->left;
+  //   }
+  //   if (v_succ != NULL_) {
+  //     printf("foo\n");
+  //     dump_node(v_succ, 0);
+  //     swap(v, v_succ);
+  //     v = v_succ;
+  //   }
+  // }
+  // printf("foo 2\n");
+  // dump_nodes(groot, 0);
+
   enum Color v_color = v->color;
   if (v->left && v->right) {
     printf("v is a inner node\n");

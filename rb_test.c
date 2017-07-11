@@ -173,7 +173,7 @@ main()
     node_pool[i] = 0;
   node_pool_acc = 0;
   /****************************************************/
-  int len = 10;
+  int len = 60;
 
   for (int i = 0; i < len; i++) {
     int j = abs(random()) % 1000;
@@ -187,7 +187,7 @@ main()
   printf("\n\n");
 
   for (int i = 0; i < len; i++) {
-    // // rb_check(groot);
+    // rb_check(groot);
     // dump_nodes(groot, 0);
     struct node* nd = get_proc();
     if (nd == NULL_) {
