@@ -87,9 +87,9 @@ void
 new_proc(int pri, int pid)
 {
   struct node* nd = alloc_node();
-  init_node(nd, pri, RED, pid - 1, 0, NULL, NULL, NULL);
+  init_node(nd, pri, RED, pid - 1, 0, NULL_, NULL_, NULL_);
   add_proc(nd);
-  dump_nodes(groot, 0);
+  // dump_nodes(groot, 0);
 }
 
 int
@@ -106,16 +106,22 @@ get_length(struct node* nd, int i)
 }
 
 int
-real_rb_tree(struct node* nd, int i, int len, int parent_pri)
+real_rb_tree(struct node* nd, int i, int len, int parent_pri, enum Color color)
 {
   if (nd == NULL_) {
     if (i + 1 == len) {
       return 1;
     } else {
+      printf("kore\n");
       return 0;
     }
   }
+  if (nd->color == RED && color == RED) {
+    printf("java\n");
+    return 0;
+  }
   if (i > len) {
+    printf("koredayo\n");
     return 0;
   }
 
@@ -135,8 +141,8 @@ real_rb_tree(struct node* nd, int i, int len, int parent_pri)
   if (nd->color == BLACK) {
     j++;
   }
-  return (real_rb_tree(nd->left, j, len, nd->pri)) &&
-         (real_rb_tree(nd->right, j, len, nd->pri));
+  return (real_rb_tree(nd->left, j, len, nd->pri, nd->color)) &&
+         (real_rb_tree(nd->right, j, len, nd->pri, nd->color));
 }
 
 void
@@ -147,8 +153,8 @@ rb_check(struct node* nd)
     return;
   }
   int len = get_length(nd->left, 0);
-  if (real_rb_tree(nd->left, 0, len, nd->pri) &&
-      real_rb_tree(nd->right, 0, len, nd->pri)) {
+  if (real_rb_tree(nd->left, 0, len, nd->pri, BLACK) &&
+      real_rb_tree(nd->right, 0, len, nd->pri, BLACK)) {
     printf("this is a real rb tree\n");
   } else {
     printf("NO!\n");
@@ -167,67 +173,29 @@ main()
     node_pool[i] = 0;
   node_pool_acc = 0;
   /****************************************************/
+  int len = 10;
 
-  //   new_proc(1000, 1);
-  //   dump_nodes(groot, 0);
-  //   new_proc(900, 2);
-  //   dump_nodes(groot, 0);
-  //   new_proc(800, 3);
-  //   dump_nodes(groot, 0);
-  //   new_proc(700, 4);
-  //   dump_nodes(groot, 0);
-  //   new_proc(600, 5);
-  //   dump_nodes(groot, 0);
-  printf("%d\n", abs(random()));
-
-  for (int i = 0; i < 141; i++) {
+  for (int i = 0; i < len; i++) {
     int j = abs(random()) % 1000;
     printf("%d, %d\n", j, i);
     new_proc(j, i);
+    // dump_nodes(groot, 0);
+    // printf("\n");
   }
 
+  // dump_nodes(groot, 0);
   printf("\n\n");
-//   struct node* nd = get_proc();
-//   free_node(nd);
-//   new_proc(5000, 1000);
-  //   new_proc(5000, 1000);
 
-  rb_check(groot);
-  
-  for (int i = 0; i < 141; i++) {
+  for (int i = 0; i < len; i++) {
+    // // rb_check(groot);
+    // dump_nodes(groot, 0);
     struct node* nd = get_proc();
-    if (nd == NULL) {
-        printf("NULL?????\n");
+    if (nd == NULL_) {
+        printf("NULL %d\n", i);
         break;
     }
-    printf("%d\n", nd->pri);
+    // printf("%d\n\n", nd->pri);
+    printf("%d, %d\n", nd->pri, i);
     free_node(nd);
   }
-  
-  //   struct node* nd1 = alloc_node();
-  //   init_node(nd1, 1000, RED, 1, 0, NULL, NULL, NULL);
-  //   struct node* nd2 = alloc_node();
-  //   struct node* nd2 = malloc(node_size - 1);
-  //   init_node(nd2, 1000, RED, 2, 0, NULL, NULL, NULL);
-  //   struct node* nd3 = alloc_node();
-  //   struct node* nd3 = malloc(node_size - 1);
-  //   init_node(nd3, 1000, RED, 3, 0, NULL, NULL, NULL);
-
-  //   add_proc(nd1);
-  //   dump_nodes(groot, 0);
-  //   add_proc(nd2);
-  //   dump_nodes(groot, 0);
-  //   add_proc(nd3);
-  //   dump_nodes(groot, 0)P;
-
-  //   dump_byte(nd1);
-
-  //   i = 0;
-  //   while (i++ < 140) {
-  //     alloc_node(0);
-  //   }
-  //   alloc_node(0);
-  //   free_node(node_pool + node_pool_acc - node_size);
-  //   alloc_node(0);
-
 }
