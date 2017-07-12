@@ -120,8 +120,10 @@ dump_node(struct node* nd, int indent)
 void
 dump_nodes(struct node* root, int indent)
 {
-  if (root == NULL_)
+  if (root == NULL_) {
+    printf("NULL tree\n");
     return;
+  }
 
   dump_node(root, indent);
 
@@ -412,13 +414,16 @@ reduce(struct node* par, int dir)
 }
 
 // v is the node to delete
-// v must have one child of be leaf
 void delete (struct node* root, struct node* v)
 {
   if (v == NULL_) {
     printf("delete : v is NULL\n");
     return;
   }
+  if (v == root && v->left == NULL_ && v->right == NULL_) {
+    groot = NULL_;
+    return;
+  } 
 
   enum Color v_color = v->color;
   if (v->left && v->right) {

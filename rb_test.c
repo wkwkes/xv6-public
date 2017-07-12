@@ -127,12 +127,12 @@ real_rb_tree(struct node* nd, int i, int len, int parent_pri, enum Color color)
 
   if (nd->dir) { // right
     if (nd->pri < parent_pri) {
-      printf("%d, %d\n", parent_pri, nd->pri);
+      printf("foo %d, %d\n", parent_pri, nd->pri);
       return 0;
     }
   } else { // left
-    if (nd->pri >= parent_pri) {
-      printf("%d, %d\n", parent_pri, nd->pri);
+    if (nd->pri > parent_pri) {
+      printf("bar %d, %d\n", parent_pri, nd->pri);
       return 0;
     }
   }
@@ -183,20 +183,22 @@ main()
     // printf("\n");
   }
 
+  rb_check(groot);
   // dump_nodes(groot, 0);
   printf("\n\n");
 
   for (int i = 0; i < len; i++) {
-    // rb_check(groot);
+    rb_check(groot);
     // dump_nodes(groot, 0);
     struct node* nd = get_proc();
     if (nd == NULL_) {
         printf("NULL %d\n", i);
         break;
     }
-    // printf("%d\n\n", nd->pri);
-    printf("%d, %d\n", nd->pri, i);
+    printf("%d\n\n", nd->pri);
+    // printf("%d, %d\n", nd->pri, i);
     free_node(nd);
+    dump_nodes(groot, 0);
   }
-  dump_nodes(groot, 0);
+  // dump_nodes(groot, 0);
 }
