@@ -64,9 +64,9 @@ dump_node(struct node* nd, int indent)
     printf("|pri:%d BLK", nd->pri);
 
   if (nd->parent) {
-    printf(" -> %d\n", nd->parent->pri);
+    printf(" -> %d, (%d)\n", nd->parent->pri, nd->proc_index);
   } else {
-    printf("\n");
+    printf("(%d)\n", nd->proc_index);
   }
   // for (i = 0; i < indent; i++)
   //   printf(" ");
@@ -398,7 +398,7 @@ reduce(struct node* par, int dir)
         reduce(p->parent, p->dir);
       }
     }
-  } else { // s_color == RED
+  } else {             // s_color == RED
     if (s->dir == 0) { // left
       s->color = BLACK;
       p->color = RED;
@@ -423,11 +423,17 @@ void delete (struct node* root, struct node* v)
   if (v == root && v->left == NULL_ && v->right == NULL_) {
     groot = NULL_;
     return;
-  } 
+  }
 
   enum Color v_color = v->color;
   if (v->left && v->right) {
     printf("v is a inner node\n");
+    struct node* v_succ = v->left; // max descendent of v
+    while (v_succ->right != NULL_) {
+      v_succ = v_succ->right;
+    }
+    swap(v, v_succ);
+    delete(root, v_succ);
     return;
   }
   struct node* u;
@@ -489,6 +495,38 @@ get_min(struct node* root)
   delete (root, v);
   return v;
 }
+
+// get a node of pri and pid
+// pid is pid - 1
+struct node*
+get_node(struct node* root, int pri, int pid)
+{
+  printf("pri:%d, pid:%d\n", pri, pid);
+  dump_nodes(groot, 0);
+  struct node* nd;
+  if (root == NULL_) {
+    return NULL_;
+  }
+  if (root->pri == pri && root->proc_index == pid) {
+    delete(groot, root);
+    return root;
+  } else if (root->pri == pri) {
+    nd = get_node(root->left, pri, pid);
+    if (nd != NULL) {
+      return nd;
+    } else {
+      return get_node(root->right, pri, pid);
+    }
+  } else {
+    if (pri < root->pri) {
+      get_node(root->left, pri, pid);
+    } else {
+      get_node(root->right, pri, pid);
+    }
+  }
+}
+
+
 
 void
 add_proc(struct node* nd)

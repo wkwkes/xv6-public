@@ -173,20 +173,31 @@ main()
     node_pool[i] = 0;
   node_pool_acc = 0;
   /****************************************************/
-  int len = 140;
+  int len = 100;
 
   for (int i = 0; i < len; i++) {
     int j = abs(random()) % 1000;
     printf("%d, %d\n", j, i);
-    new_proc(j, i);
+    new_proc(j, i+1);
     // dump_nodes(groot, 0);
     // printf("\n");
   }
 
   rb_check(groot);
-  // dump_nodes(groot, 0);
+  dump_nodes(groot, 0);
   printf("\n\n");
 
+  delete(groot, groot);
+  dump_nodes(groot, 0);
+
+  // struct node* gn = get_node(groot, 383, 0);
+  // if (gn == NULL_) {
+  //   printf("gn is NULL\n");
+  // } else {
+  //   dump_node(gn, 0);
+  // }
+  // printf("\n\n");
+  // dump_nodes(groot, 0);  
   for (int i = 0; i < len; i++) {
     rb_check(groot);
     // dump_nodes(groot, 0);
@@ -198,7 +209,8 @@ main()
     printf("%d\n\n", nd->pri);
     // printf("%d, %d\n", nd->pri, i);
     free_node(nd);
-    dump_nodes(groot, 0);
+    // dump_nodes(groot, 0);
   }
-  // dump_nodes(groot, 0);
+  dump_nodes(groot, 0);
+
 }
