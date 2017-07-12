@@ -173,7 +173,7 @@ main()
     node_pool[i] = 0;
   node_pool_acc = 0;
   /****************************************************/
-  int len = 60;
+  int len = 140;
 
   for (int i = 0; i < len; i++) {
     int j = abs(random()) % 1000;
@@ -198,4 +198,5 @@ main()
     printf("%d, %d\n", nd->pri, i);
     free_node(nd);
   }
+  dump_nodes(groot, 0);
 }
