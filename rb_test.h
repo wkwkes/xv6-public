@@ -21,6 +21,26 @@ struct node
   struct node* right;
 };
 
+
+// nd1 < nd2 : 1
+// nd1 = nd2 : 0
+// nd1 > nd2 : -1
+int compare_nodes(struct node* nd1, struct node* nd2) {
+  if (nd1->pri < nd2->pri) {
+    return 1;
+  } else if (nd1->pri == nd2->pri) {
+    if (nd1->proc_index < nd2->proc_index) {
+      return 1;
+    } else if (nd1->proc_index == nd2->proc_index) {
+      return 0;
+    } else {
+      return -1;
+    }
+  } else {
+    return -1;
+  }
+}
+
 struct node* groot;
 void
 groot_mod(struct node* nd)
@@ -55,66 +75,70 @@ dump_node(struct node* nd, int indent)
   int i;
   // for (i = 0; i < indent; i++)
   //   printf(" ");
-  // printf("+----------\n");
+  // if (nd->color == RED)
+  //   printf("|pri:%d RED", nd->pri);
+  // if (nd->color == BLACK)
+  //   printf("|pri:%d BLK", nd->pri);
+
+  // if (nd->parent) {
+  //   printf(" -> %d, (%d)\n", nd->parent->pri, nd->proc_index);
+  // } else {
+  //   printf("(%d)\n", nd->proc_index);
+  // }
   for (i = 0; i < indent; i++)
     printf(" ");
-  if (nd->color == RED)
-    printf("|pri:%d RED", nd->pri);
-  if (nd->color == BLACK)
-    printf("|pri:%d BLK", nd->pri);
+  printf("+----------\n");
 
-  if (nd->parent) {
-    printf(" -> %d, (%d)\n", nd->parent->pri, nd->proc_index);
+  for (i = 0; i < indent; i++)
+    printf(" ");
+  if (nd->color == RED) {
+    printf("|color:RED\n");
   } else {
-    printf("(%d)\n", nd->proc_index);
+    printf("|color:BLACK\n");
   }
-  // for (i = 0; i < indent; i++)
-  //   printf(" ");
 
-  // if (nd->color == RED) {
-  //   printf("|color:RED\n");
-  // } else {
-  //   printf("|color:BLACK\n");
-  // }
+  for (i = 0; i < indent; i++)
+    printf(" ");
+  printf("|pri:%d\n", nd->pri);
 
-  // for (i = 0; i < indent; i++)
-  //   printf(" ");
-  // printf("|proc_index:%d\n", nd->proc_index);
+  for (i = 0; i < indent; i++)
+    printf(" ");
+  printf("|proc_index:%d\n", nd->proc_index);
 
-  // for (i = 0; i < indent; i++)
-  //   printf(" ");
-  // if (nd->dir == 1) {
-  //   printf("|dir:right\n");
-  // } else {
-  //   printf("|dir:left\n");
-  // }
+  for (i = 0; i < indent; i++)
+    printf(" ");
+  if (nd->dir == 1) {
+    printf("|dir:right\n");
+  } else {
+    printf("|dir:left\n");
+  }
 
-  // for (i = 0; i < indent; i++)
-  //   printf(" ");
-  // if (nd->parent != NULL_) {
-  //   printf("|parent_id:%d\n", nd->parent->proc_index);
-  // } else {
-  //   printf("|parent_id:NULL_\n");
-  // }
+  for (i = 0; i < indent; i++)
+    printf(" ");
+  if (nd->parent != NULL_) {
+    printf("|parent_id:%d\n", nd->parent->proc_index);
+  } else {
+    printf("|parent_id:NULL_\n");
+  }
 
-  // for (i = 0; i < indent; i++)
-  //   printf(" ");
-  // if (nd->left == NULL_) {
-  //   printf("|left:NULL_\n");
-  // } else {
-  //   printf("|left:%d\n", nd->left->proc_index);
-  // }
+  for (i = 0; i < indent; i++)
+    printf(" ");
+  if (nd->left == NULL_) {
+    printf("|left:NULL_\n");
+  } else {
+    printf("|left:%d\n", nd->left->proc_index);
+  }
 
-  // for (i = 0; i < indent; i++)
-  //   printf(" ");
-  // if (nd->right == NULL_) {
-  //   printf("|right:NULL_\n");
-  // } else {
-  //   printf("|right:%d\n", nd->right->proc_index);
-  // }
-  // for (i = 0; i < indent; i++)
-  //   printf(" ");
-  // printf("+----------\n");
+  for (i = 0; i < indent; i++)
+    printf(" ");
+  if (nd->right == NULL_) {
+    printf("|right:NULL_\n");
+  } else {
+    printf("|right:%d\n", nd->right->proc_index);
+  }
+  for (i = 0; i < indent; i++)
+    printf(" ");
+  printf("+----------\n");
 }
 
 void
@@ -136,6 +160,75 @@ dump_nodes(struct node* root, int indent)
   }
 }
 
+int
+get_length(struct node* nd, int i)
+{
+  if (nd == NULL_) {
+    return i + 1;
+  }
+  if (nd->color == BLACK) {
+    return get_length(nd->left, i + 1);
+  } else {
+    return get_length(nd->left, i);
+  }
+}
+
+int
+real_rb_tree(struct node* nd, int i, int len, int parent_pri, enum Color color)
+{
+  if (nd == NULL_) {
+    if (i + 1 == len) {
+      return 1;
+    } else {
+      printf("kore\n");
+      return 0;
+    }
+  }
+  if (nd->color == RED && color == RED) {
+    printf("java\n");
+    return 0;
+  }
+  if (i > len) {
+    printf("koredayo\n");
+    return 0;
+  }
+
+  if (nd->dir) { // right
+    if (nd->pri < parent_pri) {
+      printf("foo %d, %d\n", parent_pri, nd->pri);
+      return 0;
+    }
+  } else { // left
+    if (nd->pri > parent_pri) {
+      printf("bar %d, %d\n", parent_pri, nd->pri);
+      return 0;
+    }
+  }
+
+  int j = i;
+  if (nd->color == BLACK) {
+    j++;
+  }
+  return (real_rb_tree(nd->left, j, len, nd->pri, nd->color)) &&
+         (real_rb_tree(nd->right, j, len, nd->pri, nd->color));
+}
+
+void
+rb_check(struct node* nd)
+{
+  if (nd == NULL_) {
+    printf("this is NULL\n");
+    return;
+  }
+  int len = get_length(nd->left, 0);
+  if (real_rb_tree(nd->left, 0, len, nd->pri, BLACK) &&
+      real_rb_tree(nd->right, 0, len, nd->pri, BLACK)) {
+    printf("this is a real rb tree\n");
+  } else {
+    printf("NO!\n");
+  }
+}
+
 void
 swap(struct node* nd1, struct node* nd2)
 { // sallow swap
@@ -144,18 +237,21 @@ swap(struct node* nd1, struct node* nd2)
   enum Color nd_color = nd1->color;
   int nd_proc_index = nd1->proc_index;
   int nd_dir = nd1->dir;
+  // struct node* nd_parent = nd1->parent;
 
   // nd1 => nd2
   nd1->pri = nd2->pri;
   nd1->color = nd2->color;
   nd1->proc_index = nd2->proc_index;
   nd1->dir = nd2->dir;
+  // nd1->parent = nd2->parent;
 
   // nd2 => nd
   nd2->pri = nd_pri;
   nd2->color = nd_color;
   nd2->proc_index = nd_proc_index;
   nd2->dir = nd_dir;
+  // nd2->parent = nd_parent;
 }
 
 void
@@ -424,15 +520,22 @@ void delete (struct node* root, struct node* v)
     groot = NULL_;
     return;
   }
-
   enum Color v_color = v->color;
-  if (v->left && v->right) {
+  if (v->left != NULL_ && v->right != NULL_) {
     printf("v is a inner node\n");
     struct node* v_succ = v->left; // max descendent of v
+    // printf("java 1\n");
     while (v_succ->right != NULL_) {
       v_succ = v_succ->right;
+      // printf("java\n");
     }
+    // printf("before(%d, %d)\n", v->pri, v_succ->pri);
+    // dump_node(v, 0);
+    // dump_node(v_succ, 0);
     swap(v, v_succ);
+    // printf("after\n");
+    // dump_node(v, 0);
+    // dump_node(v_succ, 0);
     delete(root, v_succ);
     return;
   }
@@ -493,6 +596,7 @@ get_min(struct node* root)
     v = v->left;
   }
   delete (root, v);
+  // printf("yo\n");
   return v;
 }
 
@@ -502,13 +606,18 @@ struct node*
 get_node(struct node* root, int pri, int pid)
 {
   printf("pri:%d, pid:%d\n", pri, pid);
-  dump_nodes(groot, 0);
   struct node* nd;
   if (root == NULL_) {
     return NULL_;
   }
+  int pri_, pid_;
   if (root->pri == pri && root->proc_index == pid) {
+    printf("goto delete\n");
+    pri_ = root->pri;
+    pid_ = root->proc_index;
     delete(groot, root);
+    root->pri = pri_;
+    root->proc_index = pid_;
     return root;
   } else if (root->pri == pri) {
     nd = get_node(root->left, pri, pid);
@@ -525,8 +634,6 @@ get_node(struct node* root, int pri, int pid)
     }
   }
 }
-
-
 
 void
 add_proc(struct node* nd)

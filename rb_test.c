@@ -93,75 +93,6 @@ new_proc(int pri, int pid)
 }
 
 int
-get_length(struct node* nd, int i)
-{
-  if (nd == NULL_) {
-    return i + 1;
-  }
-  if (nd->color == BLACK) {
-    return get_length(nd->left, i + 1);
-  } else {
-    return get_length(nd->left, i);
-  }
-}
-
-int
-real_rb_tree(struct node* nd, int i, int len, int parent_pri, enum Color color)
-{
-  if (nd == NULL_) {
-    if (i + 1 == len) {
-      return 1;
-    } else {
-      printf("kore\n");
-      return 0;
-    }
-  }
-  if (nd->color == RED && color == RED) {
-    printf("java\n");
-    return 0;
-  }
-  if (i > len) {
-    printf("koredayo\n");
-    return 0;
-  }
-
-  if (nd->dir) { // right
-    if (nd->pri < parent_pri) {
-      printf("foo %d, %d\n", parent_pri, nd->pri);
-      return 0;
-    }
-  } else { // left
-    if (nd->pri > parent_pri) {
-      printf("bar %d, %d\n", parent_pri, nd->pri);
-      return 0;
-    }
-  }
-
-  int j = i;
-  if (nd->color == BLACK) {
-    j++;
-  }
-  return (real_rb_tree(nd->left, j, len, nd->pri, nd->color)) &&
-         (real_rb_tree(nd->right, j, len, nd->pri, nd->color));
-}
-
-void
-rb_check(struct node* nd)
-{
-  if (nd == NULL_) {
-    printf("this is NULL\n");
-    return;
-  }
-  int len = get_length(nd->left, 0);
-  if (real_rb_tree(nd->left, 0, len, nd->pri, BLACK) &&
-      real_rb_tree(nd->right, 0, len, nd->pri, BLACK)) {
-    printf("this is a real rb tree\n");
-  } else {
-    printf("NO!\n");
-  }
-}
-
-int
 main()
 {
   /*************** initialization *********************/
@@ -184,33 +115,28 @@ main()
   }
 
   rb_check(groot);
-  dump_nodes(groot, 0);
+  // dump_nodes(groot, 0);
   printf("\n\n");
 
-  delete(groot, groot);
-  dump_nodes(groot, 0);
+  // printf("ko re -> %d, %d\n", groot->pri, groot->proc_index);
+  // struct node *md = get_node(groot, groot->pri, groot->proc_index);
+  // printf("get_node : \n");
+  // dump_node(md, 0);
+  // dump_nodes(groot, 0);
 
-  // struct node* gn = get_node(groot, 383, 0);
-  // if (gn == NULL_) {
-  //   printf("gn is NULL\n");
-  // } else {
-  //   dump_node(gn, 0);
-  // }
-  // printf("\n\n");
-  // dump_nodes(groot, 0);  
   for (int i = 0; i < len; i++) {
-    rb_check(groot);
+    // rb_check(groot);
     // dump_nodes(groot, 0);
     struct node* nd = get_proc();
     if (nd == NULL_) {
         printf("NULL %d\n", i);
         break;
     }
-    printf("%d\n\n", nd->pri);
-    // printf("%d, %d\n", nd->pri, i);
+    // printf("%d\n\n", nd->pri);
+    printf("%d, %d\n", nd->pri, i);
     free_node(nd);
     // dump_nodes(groot, 0);
   }
-  dump_nodes(groot, 0);
-
+  // dump_nodes(groot, 0);
+  return 1;
 }
