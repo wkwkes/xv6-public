@@ -98,37 +98,38 @@ main()
   if ((node_pool = kalloc()) == 0) {
     panic("pinit: out of memory(node_pool)?");
   }
-  int i;
+  int i, q;
   for (i = 0; i < 4096; i++)
     node_pool[i] = 0;
   node_pool_acc = 0;
   /****************************************************/
   int len = 140;
+  for (q = 0; q < 10; q++) {
+    printf("----------------------------\n\n");
+    for (int i = 0; i < len; i++) {
+      int j = abs(random()) % 1000;
+      printf("%d, %d\n", j, i);
+      new_proc(j, i + 1);
+      // dump_nodes(groot, 0);
+      // printf("\n");
+    }
 
-  for (int i = 0; i < len; i++) {
-    int j = abs(random()) % 1000;
-    printf("%d, %d\n", j, i);
-    new_proc(j, i+1);
-    // dump_nodes(groot, 0);
-    // printf("\n");
-  }
-
-  rb_check(groot);
-  printf("\n\n");
-
-  struct node *md = get_node(groot, groot->pri, groot->proc_index);
-  printf("get_node : \n");
-  dump_node(md, 0);
-
-  for (int i = 0; i < len; i++) {
     rb_check(groot);
-    struct node* nd = get_proc();
-    if (nd == NULL_) {
+    printf("-----------------------------\n\n");
+
+    for (int i = 0; i < len; i++) {
+      // rb_check(groot);
+      // dump_nodes(groot, 0);
+      struct node* nd = get_proc();
+      // struct node* nd = get_node(groot, groot->pri, groot->proc_index);
+      // printf("get_node : \n");
+      if (nd == NULL_) {
         printf("NULL %d\n", i);
         break;
+      }
+      printf("%d, %d\n", nd->pri, i);
+      free_node(nd);
     }
-    printf("%d, %d\n", nd->pri, i);
-    free_node(nd);
   }
   return 1;
 }

@@ -208,7 +208,7 @@ real_rb_tree(struct node* nd,
       return 0;
     }
   } else { // left
-    if (compare_nodes(nd->pri, nd->proc_index, parent_pri, parent_pid) <= 0) {
+    if (compare_nodes(nd->pri, nd->proc_index, parent_pri, parent_pid) < 0) {
       printf("bar %d, %d\n", parent_pri, nd->pri);
       return 0;
     }
@@ -511,16 +511,15 @@ reduce(struct node* par, int dir)
 }
 
 // v is the node to delete
-struct node *
-delete (struct node* root, struct node* v)
+void delete (struct node* root, struct node* v)
 {
   if (v == NULL_) {
     printf("delete : v is NULL\n");
-    return v;
+    return;
   }
   if (v == root && v->left == NULL_ && v->right == NULL_) {
     groot = NULL_;
-    return v;
+    return;
   }
   enum Color v_color = v->color;
   if (v->left != NULL_ && v->right != NULL_) {
@@ -530,20 +529,19 @@ delete (struct node* root, struct node* v)
       v_succ = v_succ->right;
     }
     
-    // printf("before(%d, %d)\n", v->pri, v_succ->pri);
+    printf("before(%d, %d)\n", v->pri, v_succ->pri);
     // dump_node(v, 0);
     // dump_node(v_succ, 0);
-    // dump_nodes(groot, 0);
+    dump_nodes(groot, 0);
     swap(v, v_succ);
-    // printf("after\n");
+    printf("after\n");
     // dump_nodes(groot, 0);
     // dump_node(v, 0);
     // printf("v_succ is \n");
     // dump_node(v_succ, 0);
-
-    return delete (groot, v_succ);
-    // dump_nodes(groot, 0);
-    // return;
+    delete (groot, v_succ);
+    dump_nodes(groot, 0);
+    return;
   }
   // printf("dump v :\n");
   // dump_nodes(v->left, 0);
@@ -570,7 +568,7 @@ delete (struct node* root, struct node* v)
     // printf("RED pattern\n");
     if (v->parent == NULL_) {
       groot = u;
-      return v;
+      return;
     }
     if (v->dir == 0) {
       // printf("java\n");
@@ -585,24 +583,20 @@ delete (struct node* root, struct node* v)
       u->dir = v->dir;
       u->color = BLACK;
     }
-    return v;
     // printf("dump u :\n");
     // dump_nodes(v->parent, 0);
   } else if (v_color == BLACK &&
              u_color == BLACK) { // (3) in this pattern, u must be NULL
     if (v->parent == NULL_) {
       groot = NULL_;
-      return v;
+      return;
     }
     if (v->dir == 0) {
       v->parent->left = NULL_;
     } else {
       v->parent->right = NULL_;
     }
-    // printf("before reduce\n");
-    // dump_nodes(groot, 0);
     reduce(v->parent, v->dir);
-    return v;
   }
 }
 
@@ -617,9 +611,9 @@ get_min(struct node* root)
   while (v->left != NULL_) {
     v = v->left;
   }
-  return delete (root, v);
+  delete (root, v);
   // printf("yo\n");
-  // return v;
+  return v;
 }
 
 // get a node of pri and pid
@@ -627,7 +621,7 @@ get_min(struct node* root)
 struct node*
 get_node(struct node* root, int pri, int pid)
 {
-  // printf("pri:%d, pid:%d\n", pri, pid);
+  printf("pri:%d, pid:%d\n", pri, pid);
   struct node* nd;
   if (root == NULL_) {
     return NULL_;
@@ -635,10 +629,10 @@ get_node(struct node* root, int pri, int pid)
   int pri_, pid_;
   if (root->pri == pri && root->proc_index == pid) {
     // printf("goto delete\n");
-    return delete (groot, root);
+    delete (groot, root);
     // root->pri = pri;
     // root->proc_index = pid;
-    // return root;
+    return root;
   } else if (compare_nodes(pri, pid, root->pri, root->proc_index) < 0) {
     return get_node(root->left, pri, pid);
   } else {
