@@ -33,7 +33,6 @@ is_used(char* ptr)
 struct node*
 alloc_node_(int c)
 {
-  //   printf("alloc (%d, %d)\n", node_pool_acc, c);
   if (node_pool_acc + node_size <= 4096) {
     node_pool_acc += node_size;
     if (is_used(&node_pool[node_pool_acc - node_size]) == 0) {
@@ -104,7 +103,7 @@ main()
     node_pool[i] = 0;
   node_pool_acc = 0;
   /****************************************************/
-  int len = 20;
+  int len = 140;
 
   for (int i = 0; i < len; i++) {
     int j = abs(random()) % 1000;
@@ -115,28 +114,21 @@ main()
   }
 
   rb_check(groot);
-  // dump_nodes(groot, 0);
   printf("\n\n");
 
-  // printf("ko re -> %d, %d\n", groot->pri, groot->proc_index);
   struct node *md = get_node(groot, groot->pri, groot->proc_index);
   printf("get_node : \n");
   dump_node(md, 0);
-  // dump_nodes(groot, 0);
 
   for (int i = 0; i < len; i++) {
     rb_check(groot);
-    // dump_nodes(groot, 0);
     struct node* nd = get_proc();
     if (nd == NULL_) {
         printf("NULL %d\n", i);
         break;
     }
-    // printf("%d\n\n", nd->pri);
     printf("%d, %d\n", nd->pri, i);
     free_node(nd);
-    // dump_nodes(groot, 0);
   }
-  // dump_nodes(groot, 0);
   return 1;
 }
