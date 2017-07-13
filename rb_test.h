@@ -21,17 +21,18 @@ struct node
   struct node* right;
 };
 
-
 // nd1 < nd2 : 1
 // nd1 = nd2 : 0
 // nd1 > nd2 : -1
-int compare_nodes(struct node* nd1, struct node* nd2) {
-  if (nd1->pri < nd2->pri) {
+int
+compare_nodes(int nd1_pri, int nd1_pid, int nd2_pri, int nd2_pid)
+{
+  if (nd1_pri < nd2_pri) {
     return 1;
-  } else if (nd1->pri == nd2->pri) {
-    if (nd1->proc_index < nd2->proc_index) {
+  } else if (nd1_pri == nd2_pri) {
+    if (nd1_pid < nd2_pid) {
       return 1;
-    } else if (nd1->proc_index == nd2->proc_index) {
+    } else if (nd1_pid == nd2_pid) {
       return 0;
     } else {
       return -1;
@@ -174,7 +175,12 @@ get_length(struct node* nd, int i)
 }
 
 int
-real_rb_tree(struct node* nd, int i, int len, int parent_pri, enum Color color)
+real_rb_tree(struct node* nd,
+             int i,
+             int len,
+             int parent_pri,
+             int parent_pid,
+             enum Color color)
 {
   if (nd == NULL_) {
     if (i + 1 == len) {
@@ -194,12 +200,12 @@ real_rb_tree(struct node* nd, int i, int len, int parent_pri, enum Color color)
   }
 
   if (nd->dir) { // right
-    if (nd->pri < parent_pri) {
+    if (compare_nodes(nd->pri, nd->proc_index, parent_pri, parent_pid) > 0) {
       printf("foo %d, %d\n", parent_pri, nd->pri);
       return 0;
     }
   } else { // left
-    if (nd->pri > parent_pri) {
+    if (compare_nodes(nd->pri, nd->proc_index, parent_pri, parent_pid) < 0) {
       printf("bar %d, %d\n", parent_pri, nd->pri);
       return 0;
     }
@@ -209,8 +215,8 @@ real_rb_tree(struct node* nd, int i, int len, int parent_pri, enum Color color)
   if (nd->color == BLACK) {
     j++;
   }
-  return (real_rb_tree(nd->left, j, len, nd->pri, nd->color)) &&
-         (real_rb_tree(nd->right, j, len, nd->pri, nd->color));
+  return (real_rb_tree(nd->left, j, len, nd->pri, nd->proc_index, nd->color)) &&
+         (real_rb_tree(nd->right, j, len, nd->pri, nd->proc_index, nd->color));
 }
 
 void
@@ -221,8 +227,8 @@ rb_check(struct node* nd)
     return;
   }
   int len = get_length(nd->left, 0);
-  if (real_rb_tree(nd->left, 0, len, nd->pri, BLACK) &&
-      real_rb_tree(nd->right, 0, len, nd->pri, BLACK)) {
+  if (real_rb_tree(nd->left, 0, len, nd->pri, nd->proc_index, BLACK) &&
+      real_rb_tree(nd->right, 0, len, nd->pri, nd->proc_index, BLACK)) {
     printf("this is a real rb tree\n");
   } else {
     printf("NO!\n");
@@ -262,32 +268,24 @@ insert_helper(struct node* root, struct node* nd)
     groot = nd;
     return;
   }
-  if (nd->pri < root->pri) {
+  if (compare_nodes(nd->pri, nd->proc_index, root->pri, root->proc_index) > 0) {
     nd->dir = 0;
-    // printf("maji?\n");
     if (root->left == NULL_) {
-      // printf("maji 2?\n");
       root->left = nd;
       nd->parent = root;
       groot_mod(root);
     } else {
-      // printf("maji 3?\n");
       insert_helper(root->left, nd);
     }
   } else {
     nd->dir = 1;
-    // printf("maji de?\n");
     if (root->right == NULL_) {
-      // printf("maji de 2?\n");
       root->right = nd;
       nd->parent = root;
-      // printf("koko\n");
       groot_mod(root);
     } else {
       if (root->right == NULL_) {
-        // printf("komatta!!!\n");
       }
-      // printf("maji de 3?\n");
       insert_helper(root->right, nd);
     }
   }
@@ -529,14 +527,17 @@ void delete (struct node* root, struct node* v)
       v_succ = v_succ->right;
       // printf("java\n");
     }
-    // printf("before(%d, %d)\n", v->pri, v_succ->pri);
+    
+    printf("before(%d, %d)\n", v->pri, v_succ->pri);
     // dump_node(v, 0);
     // dump_node(v_succ, 0);
+    // dump_nodes(groot, 0);
     swap(v, v_succ);
-    // printf("after\n");
+    printf("after\n");
+    // dump_nodes(groot, 0);
     // dump_node(v, 0);
     // dump_node(v_succ, 0);
-    delete(root, v_succ);
+    delete (groot, v_succ);
     return;
   }
   struct node* u;
@@ -615,23 +616,14 @@ get_node(struct node* root, int pri, int pid)
     printf("goto delete\n");
     pri_ = root->pri;
     pid_ = root->proc_index;
-    delete(groot, root);
+    delete (groot, root);
     root->pri = pri_;
     root->proc_index = pid_;
     return root;
-  } else if (root->pri == pri) {
-    nd = get_node(root->left, pri, pid);
-    if (nd != NULL) {
-      return nd;
-    } else {
-      return get_node(root->right, pri, pid);
-    }
+  } else if (compare_nodes(pri, pid, root->pri, root->proc_index) < 0) {
+    return get_node(root->left, pri, pid);
   } else {
-    if (pri < root->pri) {
-      get_node(root->left, pri, pid);
-    } else {
-      get_node(root->right, pri, pid);
-    }
+    return get_node(root->right, pri, pid);
   }
 }
 

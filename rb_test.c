@@ -104,7 +104,7 @@ main()
     node_pool[i] = 0;
   node_pool_acc = 0;
   /****************************************************/
-  int len = 100;
+  int len = 20;
 
   for (int i = 0; i < len; i++) {
     int j = abs(random()) % 1000;
@@ -119,13 +119,13 @@ main()
   printf("\n\n");
 
   // printf("ko re -> %d, %d\n", groot->pri, groot->proc_index);
-  // struct node *md = get_node(groot, groot->pri, groot->proc_index);
-  // printf("get_node : \n");
-  // dump_node(md, 0);
+  struct node *md = get_node(groot, groot->pri, groot->proc_index);
+  printf("get_node : \n");
+  dump_node(md, 0);
   // dump_nodes(groot, 0);
 
   for (int i = 0; i < len; i++) {
-    // rb_check(groot);
+    rb_check(groot);
     // dump_nodes(groot, 0);
     struct node* nd = get_proc();
     if (nd == NULL_) {
